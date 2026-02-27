@@ -1,0 +1,46 @@
+version: "3.9"
+
+services:
+  frontend:
+    build:
+      context: ./front
+      dockerfile: Dockerfile
+      args:
+        NEXT_PUBLIC_API_URL: ${NEXT_PUBLIC_API_URL:-http://api:8000}
+        NEXT_PUBLIC_JAEGER_URL: ${NEXT_PUBLIC_JAEGER_URL:-http://localhost:16686}
+    image: hr-pulse-frontend:latest
+    container_name: hr_pulse_frontend
+    ports:
+      - "3000:3000"
+    environment:
+      - NODE_ENV=production
+      - NEXT_PUBLIC_API_URL=${NEXT_PUBLIC_API_URL:-http://api:8000}
+      - NEXT_PUBLIC_JAEGER_URL=${NEXT_PUBLIC_JAEGER_URL:-http://localhost:16686}
+    depends_on:
+      - api
+    restart: unless-stopped
+    networks:
+      - hrpulse_net
+
+  # ── Placeholder for your FastAPI backend ──────────────────────────────────
+  # api:
+  #   build: ./backend
+  #   container_name: hr_pulse_api
+  #   ports:
+  #     - "8000:8000"
+  #   networks:
+  #     - hrpulse_net
+
+  # ── Jaeger (distributed tracing) ─────────────────────────────────────────
+  # jaeger:
+  #   image: jaegertracing/all-in-one:latest
+  #   container_name: hr_pulse_jaeger
+  #   ports:
+  #     - "16686:16686"
+  #     - "6831:6831/udp"
+  #   networks:
+  #     - hrpulse_net
+
+networks:
+  hrpulse_net:
+    driver: bridge
